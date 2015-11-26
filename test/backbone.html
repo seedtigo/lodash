@@ -21,7 +21,6 @@
     <script src="../node_modules/qunit-extras/qunit-extras.js"></script>
     <script src="../vendor/json-js/json2.js"></script>
     <script src="../node_modules/platform/platform.js"></script>
-    <script src="./asset/shims.js"></script>
     <script src="./asset/test-ui.js"></script>
     <script src="../lodash.js"></script>
     <script>
@@ -29,12 +28,30 @@
       QUnit.config.hidepassed = true;
 
       var mixinPrereqs = (function() {
+        var aliasToReal = {
+          'indexBy': 'keyBy',
+          'invoke': 'invokeMap'
+        };
+
+        var keyMap = {
+          'rest': 'tail'
+        };
+
         var lodash = _.noConflict();
 
         return function(_) {
           lodash.defaultsDeep(_, { 'templateSettings': lodash.templateSettings });
-          lodash.mixin(_ , { 'indexBy': lodash.keyBy });
           lodash.mixin(_, lodash.pick(lodash, lodash.difference(lodash.functions(lodash), lodash.functions(_))));
+
+          lodash.forOwn(keyMap, function(realName, otherName) {
+            _[otherName] = lodash[realName];
+            _.prototype[otherName] = lodash.prototype[realName];
+          });
+
+          lodash.forOwn(aliasToReal, function(realName, alias) {
+            _[alias] = _[realName];
+            _.prototype[alias] = _.prototype[realName];
+          });
         };
       }());
 

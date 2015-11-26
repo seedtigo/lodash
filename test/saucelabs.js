@@ -103,17 +103,16 @@ var browserNameMap = {
 /** List of platforms to load the runner on. */
 var platforms = [
   ['Linux', 'android', '5.1'],
-  ['Windows 10', 'chrome', '44'],
-  ['Windows 10', 'chrome', '43'],
-  ['Windows 10', 'firefox', '39'],
-  ['Windows 10', 'firefox', '38'],
+  ['Windows 10', 'chrome', '46'],
+  ['Windows 10', 'chrome', '45'],
+  ['Windows 10', 'firefox', '41'],
+  ['Windows 10', 'firefox', '40'],
   ['Windows 10', 'microsoftedge', '20.10240'],
   ['Windows 10', 'internet explorer', '11'],
   ['Windows 8', 'internet explorer', '10'],
   ['Windows 7', 'internet explorer', '9'],
-  //['Windows 7', 'internet explorer', '8'],
-  ['OS X 10.10', 'ipad', '8.4'],
-  ['OS X 10.11', 'safari', '8.1'],
+  // ['OS X 10.10', 'ipad', '9.1'],
+  ['OS X 10.11', 'safari', '9'],
   ['OS X 10.10', 'safari', '8']
 ];
 
@@ -269,7 +268,7 @@ function isJobId(value) {
  */
 function logInline(text) {
   var blankLine = _.repeat(' ', _.size(prevLine));
-  prevLine = text = _.trunc(text, { 'length': 40 });
+  prevLine = text = _.truncate(text, { 'length': 40 });
   process.stdout.write(text + blankLine.slice(text.length) + '\r');
 }
 
@@ -291,7 +290,7 @@ function logThrobber() {
  * @returns {Array} Returns the new converted array.
  */
 function optionToArray(name, string) {
-  return _.compact(_.invoke((optionToValue(name, string) || '').split(/, */), 'trim'));
+  return _.compact(_.invokeMap((optionToValue(name, string) || '').split(/, */), 'trim'));
 }
 
 /**
@@ -715,7 +714,7 @@ function Tunnel(properties) {
       total = all.length,
       tunnel = this;
 
-  _.invoke(all, 'on', 'complete', function() {
+  _.invokeMap(all, 'on', 'complete', function() {
     _.pull(active, this);
     if (success) {
       success = !this.failed;
@@ -727,7 +726,7 @@ function Tunnel(properties) {
     tunnel.dequeue();
   });
 
-  _.invoke(all, 'on', 'restart', function() {
+  _.invokeMap(all, 'on', 'restart', function() {
     if (!_.includes(restarted, this)) {
       restarted.push(this);
     }
@@ -775,7 +774,7 @@ Tunnel.prototype.restart = function(callback) {
       all = jobs.all;
 
   var reset = _.after(all.length, _.bind(this.stop, this, onGenericRestart)),
-      stop = _.after(active.length, _.partial(_.invoke, all, 'reset', reset));
+      stop = _.after(active.length, _.partial(_.invokeMap, all, 'reset', reset));
 
   if (_.isEmpty(active)) {
     _.defer(stop);
@@ -783,7 +782,7 @@ Tunnel.prototype.restart = function(callback) {
   if (_.isEmpty(all)) {
     _.defer(reset);
   }
-  _.invoke(active, 'stop', function() {
+  _.invokeMap(active, 'stop', function() {
     _.pull(active, this);
     stop();
   });
@@ -871,7 +870,7 @@ Tunnel.prototype.stop = function(callback) {
   if (_.isEmpty(active)) {
     _.defer(stop);
   }
-  _.invoke(active, 'stop', function() {
+  _.invokeMap(active, 'stop', function() {
     _.pull(active, this);
     stop();
   });

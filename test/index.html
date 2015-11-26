@@ -5,7 +5,7 @@
     <title>lodash Test Suite</title>
     <link rel="stylesheet" href="../node_modules/qunitjs/qunit/qunit.css">
     <style>
-      #exports {
+      #exports, #module {
         display: none;
       }
     </style>
@@ -22,12 +22,15 @@
         };
       }
     </script>
+    <script src="../node_modules/lodash/index.js"></script>
+    <script>var lodashStable = _.noConflict();</script>
     <script src="../node_modules/qunitjs/qunit/qunit.js"></script>
     <script src="../node_modules/qunit-extras/qunit-extras.js"></script>
     <script src="../node_modules/platform/platform.js"></script>
     <script src="./asset/test-ui.js"></script>
     <div id="qunit"></div>
     <div id="exports"></div>
+    <div id="module"></div>
     <script>
       var setProperty = (function() {
         var _defineProperty = Object.defineProperty;
@@ -42,6 +45,7 @@
           } catch(e) {
             object[key] = value;
           }
+          return object;
         };
       }());
 
@@ -61,9 +65,11 @@
             return value;
           };
         }
+
         function createToString(funcName) {
           return constant(nativeString.replace(reToString, funcName));
         }
+
         // Allow bypassing native checks.
         setProperty(funcProto, 'toString', (function() {
           function wrapper() {
@@ -85,7 +91,23 @@
         });
 
         setProperty(window, '_Map', window.Map);
-        setProperty(window, 'Map', noop);
+        if (_Map) {
+          setProperty(window, 'Map', (function(Map) {
+            var count = 0;
+            return function() {
+              if (count++) {
+                return new Map;
+              }
+              var result = {};
+              setProperty(window, 'Map', Map);
+              return result;
+            };
+          }(_Map)));
+
+          setProperty(Map, 'toString', createToString('Map'));
+        }
+        setProperty(Object, '_create', window.create);
+        setProperty(Object, 'create', noop);
 
         setProperty(window, '_Set', window.Set);
         setProperty(window, 'Set', noop);
@@ -106,35 +128,41 @@
         var funcProto = Function.prototype,
             objectProto = Object.prototype;
 
-        if (window._Map) {
+        if (Object._create) {
+          Object.create = Object._create;
+        } else {
+          delete Object.create;
+        }
+        if (_Map) {
           Map = _Map;
         } else {
           setProperty(window, 'Map', undefined);
         }
-        if (window._Set) {
+        if (_Set) {
           Set = _Set;
         } else {
           setProperty(window, 'Set', undefined);
         }
-        if (window._WeakMap) {
+        if (_WeakMap) {
           WeakMap = _WeakMap;
         } else {
           setProperty(window, 'WeakMap', undefined);
         }
+        setProperty(objectProto, 'propertyIsEnumerable', objectProto._propertyIsEnumerable);
+
         setProperty(window, '_Map', undefined);
         setProperty(window, '_Set', undefined);
         setProperty(window, '_WeakMap', undefined);
 
         setProperty(window, 'WinRTError', undefined);
 
-        setProperty(window, 'exports', undefined);
+        setProperty(window, 'exports', document.getElementById('exports'));
         setProperty(window, 'global', undefined);
-        setProperty(window, 'module', undefined);
-
-        setProperty(objectProto, 'propertyIsEnumerable', objectProto._propertyIsEnumerable);
+        setProperty(window, 'module', document.getElementById('module'));
 
         delete funcProto._method;
         delete objectProto._propertyIsEnumerable;
+        delete Object._create;
       }
 
       // Load lodash to expose it to the bad extensions/shims.
@@ -248,13 +276,11 @@
               require(getConfig(), [
                 'lodash/internal/baseEach',
                 'lodash/internal/isIndex',
-                'lodash/internal/isIterateeCall',
-                'lodash/internal/isLength'
-              ], function(baseEach, isIndex, isIterateeCall, isLength) {
+                'lodash/internal/isIterateeCall'
+              ], function(baseEach, isIndex, isIterateeCall) {
                 lodash._baseEach = baseEach;
                 lodash._isIndex = isIndex;
                 lodash._isIterateeCall = isIterateeCall;
-                lodash._isLength = isLength;
                 loadTests();
               });
             } else {
