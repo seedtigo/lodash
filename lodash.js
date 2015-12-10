@@ -875,6 +875,20 @@
   }
 
   /**
+   * The base implementation of `_.trim` without support trimming non-whitespace
+   * characters.
+   *
+   * @private
+   * @param {string} string The string to trim.
+   * @returns {string} Returns the trimmed string.
+   */
+  function baseTrim(string) {
+    return string
+      ? string.slice(trimmedStartIndex(string), trimmedEndIndex(string) + 1)
+      : string;
+  }
+
+  /**
    * The base implementation of `_.unary` without support for storing wrapper metadata.
    *
    * @private
@@ -10208,7 +10222,7 @@
       if (typeof value == 'number' || !isString(value)) {
         return +value;
       }
-      value = trim(value);
+      value = baseTrim(value);
       var isBinary = reIsBinary.test(value);
       return (isBinary || reIsOctal.test(value))
         ? nativeParseInt(value.slice(2), isBinary ? 2 : 8)
@@ -12039,7 +12053,7 @@
       } else if (radix) {
         radix = +radix;
       }
-      string = trim(string);
+      string = baseTrim(toString(string));
       return nativeParseInt(string, radix || (reHasHexPrefix.test(string) ? 16 : 10));
     }
 
@@ -12432,7 +12446,7 @@
         return string;
       }
       if (guard || chars === undefined) {
-        return string.slice(trimmedStartIndex(string), trimmedEndIndex(string) + 1);
+        return baseTrim(string);
       }
       chars = (chars + '');
       if (!chars) {
@@ -13272,7 +13286,11 @@
       } else {
         end = toNumber(end) || 0;
       }
+<<<<<<< HEAD
       step = step === undefined ? 1 : (toNumber(step) || 0);
+=======
+      step = step === undefined ? (start < end ? 1 : -1) : (toNumber(step) || 0);
+>>>>>>> refs/remotes/lodash/master
 
       var n = nativeMax(nativeCeil((end - start) / (step || 1)), 0);
       return baseTimes(n, function(index) {

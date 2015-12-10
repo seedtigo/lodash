@@ -15555,12 +15555,19 @@
   QUnit.module('lodash.range');
 
   (function() {
+<<<<<<< HEAD
     QUnit.test('should work with only an `end` argument', function(assert) {
       assert.expect(1);
+=======
+    QUnit.test('should infer the sign of `step` when provided only an `end` argument', function(assert) {
+      assert.expect(2);
+>>>>>>> refs/remotes/lodash/master
 
       assert.deepEqual(_.range(4), [0, 1, 2, 3]);
+      assert.deepEqual(_.range(-4), [0, -1, -2, -3]);
     });
 
+<<<<<<< HEAD
     QUnit.test('should use a `step` of `-1` when provided only a negative `end` argument', function(assert) {
       assert.expect(1);
 
@@ -15569,13 +15576,20 @@
 
     QUnit.test('should work with `start` and `end` arguments', function(assert) {
       assert.expect(1);
+=======
+    QUnit.test('should infer the sign of `step` when provided only a `start` and `end` argument', function(assert) {
+      assert.expect(2);
+>>>>>>> refs/remotes/lodash/master
 
       assert.deepEqual(_.range(1, 5), [1, 2, 3, 4]);
+      assert.deepEqual(_.range(5, 1), [5, 4, 3, 2]);
     });
 
     QUnit.test('should work with `start`, `end`, and `step` arguments', function(assert) {
-      assert.expect(1);
+      assert.expect(3);
 
+      assert.deepEqual(_.range(0, -4, -1), [0, -1, -2, -3]);
+      assert.deepEqual(_.range(5, 1, -1), [5, 4, 3, 2]);
       assert.deepEqual(_.range(0, 20, 5), [0, 5, 10, 15]);
     });
 
